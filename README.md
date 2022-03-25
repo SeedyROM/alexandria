@@ -14,6 +14,6 @@ Right now all this is, is the beginning of a storage engine for a persistent KV 
 
 ## Tasks
 
-- [+] WAL (Sort of... not fully tested)
+- [x] WAL (Sort of... not fully tested)
 - [ ] MemTable
 - [ ] SSTable
