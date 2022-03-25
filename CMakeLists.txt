@@ -5,3 +5,4 @@ set(CMAKE_C_STANDARD 11)
 include_directories(src/)
 
 add_executable(babel src/main.c src/wal.c src/memtable.c)
+target_link_libraries(babel m)

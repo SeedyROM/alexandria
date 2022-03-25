@@ -11,6 +11,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+/**
+ * Calculate the CRC for a given byte.
+ * @param r
+ * @return
+ */
 uint32_t crc32_for_byte(uint32_t r) {
     for(int j = 0; j < 8; ++j)
         r = (r & 1? 0: (uint32_t)0xEDB88320L) ^ r >> 1;
@@ -22,6 +27,11 @@ uint32_t crc32_for_byte(uint32_t r) {
  * probably the optimal choice for most systems. */
 typedef unsigned long accum_t;
 
+/**
+ * Initialize the CRC32 tables
+ * @param table
+ * @param wtable
+ */
 void init_tables(uint32_t* table, uint32_t* wtable) {
     for(size_t i = 0; i < 0x100; ++i)
         table[i] = crc32_for_byte(i);
@@ -33,6 +43,12 @@ void init_tables(uint32_t* table, uint32_t* wtable) {
         }
 }
 
+/**
+ * Calculate the CRC32 for some given buffer of data.
+ * @param data
+ * @param n_bytes
+ * @param crc
+ */
 void crc32(const void* data, size_t n_bytes, uint32_t* crc) {
     static uint32_t table[0x100], wtable[0x100*sizeof(accum_t)];
     size_t n_accum = n_bytes/sizeof(accum_t);
