@@ -72,8 +72,9 @@ bool memtable_coin_flip(struct memtable *mt);
  * @param mt
  * @param entry
  */
-void memtable_insert(struct memtable *mt, u_int64_t timestamp, u_int32_t key_size, u_int32_t value_size, u_int8_t *key,
-                     u_int8_t *value);
+struct memtable_entry *
+memtable_insert(struct memtable *mt, u_int64_t timestamp, u_int32_t key_size, u_int32_t value_size, u_int8_t *key,
+                u_int8_t *value);
 
 /**
  * Search the memtable for a key

@@ -59,24 +59,25 @@ bool memtable_coin_flip(struct memtable *mt) {
     return r >= mt->p;
 }
 
-void memtable_insert(struct memtable *mt, u_int64_t timestamp, u_int32_t key_size, u_int32_t value_size, u_int8_t *key,
-                     u_int8_t *value) {
+struct memtable_entry *
+memtable_insert(struct memtable *mt, u_int64_t timestamp, u_int32_t key_size, u_int32_t value_size, u_int8_t *key,
+                u_int8_t *value) {
     struct memtable_entry *entry = memtable_entry_new(
-        mt->level,
-        timestamp,
-        key_size,
-        value_size,
-        key,
-        value
+            mt->level,
+            timestamp,
+            key_size,
+            value_size,
+            key,
+            value
     );
 
     // If our skiplist is empty insert at the head.
     if (mt->head == NULL) {
         mt->head = entry;
-        return;
+        return entry;
     }
 
-
+    return entry;
 }
 
 struct memtable_entry *memtable_search(struct memtable *mt, u_int32_t key_size, u_int8_t *key) {

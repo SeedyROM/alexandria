@@ -2,33 +2,53 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <time.h>
+#include <string.h>
 
 #include "wal.h"
 #include "memtable.h"
 
+#define MAX_TEST_CASES 3
+
 int main(int argc, char **argv) {
+    struct test_data {
+        char *key;
+        char *value;
+    };
+
+    struct test_data t[MAX_TEST_CASES] = {
+        {
+            .key = "yoted",
+            .value = "bloated"
+        },
+        {
+            .key = "goated",
+            .value = "quoted"
+        },
+        {
+            .key = "soupy",
+            .value = "me"
+        }
+    };
+
+
     // ===============================================================================
     // memtable
     // ===============================================================================
 
     struct memtable *mt = memtable_new(128, 0.5);
 
-    memtable_insert(
-        mt,
-        time(NULL),
-        5,
-        5,
-        (u_int8_t *) "yote",
-        (u_int8_t *) "boat"
-    );
-    memtable_insert(
+    for (int i = 0; i < MAX_TEST_CASES; i++) {
+        struct test_data test = t[i];
+
+        memtable_insert(
             mt,
             time(NULL),
-            5,
-            5,
-            (u_int8_t *) "yote",
-            (u_int8_t *) "goat"
-    );
+            strlen(test.key) + 1,
+            strlen(test.value) + 1,
+            (u_int8_t *) test.key,
+            (u_int8_t *) test.value
+        );
+    }
 
     memtable_free(mt);
 
@@ -39,47 +59,31 @@ int main(int argc, char **argv) {
     struct wal *w = wal_open("./yoted.log");
     assert(w != NULL);
 
-    struct wal_entry *e = wal_entry_new(
-        time(NULL),
-        6,
-        5,
-        (u_int8_t *) "yoted",
-        (u_int8_t *) "king"
-    );
+    for (int i = 0; i < MAX_TEST_CASES; i++) {
+        struct test_data test = t[i];
+        struct wal_entry *e = wal_entry_new(
+            time(NULL),
+            strlen(test.key) + 1,
+            strlen(test.value) + 1,
+            (u_int8_t *) test.key,
+            (u_int8_t *) test.value
+        );
+        wal_append(w, e);
+        free(e);
+    }
 
-    struct wal_entry *e1 = wal_entry_new(
-        time(NULL),
-        7,
-        6,
-        (u_int8_t *) "goated",
-        (u_int8_t *) "queen"
-    );
-
-    struct wal_entry *e2 = wal_entry_new(
-        time(NULL),
-        4,
-        7,
-        (u_int8_t *) "edy",
-        (u_int8_t *) "is gay"
-    );
-
-    wal_append(w, e);
-    wal_append(w, e1);
-    wal_append(w, e2);
-
-    wal_entry_free(e);
-    wal_entry_free(e1);
-    wal_entry_free(e2);
-
-    struct wal_entry e3;
-    e3.key = NULL;
-    e3.value = NULL;
+    // TODO: This needs to be a function
+    struct wal_entry e;
+    e.key = NULL;
+    e.value = NULL;
     fseek(w->file, 0, SEEK_SET);
-    while (wal_read(w, &e3)) {
-        printf("CRC32: %u\n", e3.crc32);
-        printf("Timestamp: %lu\n", e3.timestamp);
-        printf("Key: %s\n", (char *) e3.key);
-        printf("Value: %s\n\n", (char *) e3.value);
+
+    for (int i = 0; i < MAX_TEST_CASES; i++) {
+        struct test_data test = t[i];
+        wal_read(w, &e);
+
+        assert(strcmp(test.key, (char *) e.key) == 0);
+        assert(strcmp(test.value, (char *) e.value) == 0);
     }
 
     wal_free(w);
